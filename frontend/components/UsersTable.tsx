@@ -47,6 +47,50 @@ function getPageNumbers(current: number, total: number): (number | "ellipsis")[]
   return pages;
 }
 
+function formatTime12(date: Date): string {
+  let hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  return `${hours}:${minutes} ${ampm}`;
+}
+
+function formatLastLogin(
+  isoString: string | null | undefined,
+  isCurrentUser: boolean,
+): string {
+  if (isCurrentUser) return "—";
+  if (!isoString) return "Never";
+
+  const date = new Date(isoString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMin / 60);
+
+  if (diffMin < 1) return "Just now";
+  if (diffMin < 60) return `${diffMin} min ago`;
+  if (diffHours < 24) return `${diffHours} hours ago`;
+
+  // Yesterday check: compare date components
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (
+    date.getFullYear() === yesterday.getFullYear() &&
+    date.getMonth() === yesterday.getMonth() &&
+    date.getDate() === yesterday.getDate()
+  ) {
+    return `Yesterday, ${formatTime12(date)}`;
+  }
+
+  // Older dates: "25 Jun 2026, 09:30 AM"
+  const months = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
+  return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}, ${formatTime12(date)}`;
+}
+
 interface UsersTableProps {
   users: ApiUser[];
   onView: (user: ApiUser) => void;
@@ -317,6 +361,9 @@ export default function UsersTable({
                   <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-8 py-5">
                     Role
                   </th>
+                  <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-8 py-5 hidden md:table-cell">
+                    Last Login
+                  </th>
                   <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider px-8 py-5">
                     Actions
                   </th>
@@ -373,6 +420,13 @@ export default function UsersTable({
                       >
                         {user.role}
                       </span>
+                    </td>
+
+                    {/* Last Login */}
+                    <td className="px-8 py-5 hidden md:table-cell">
+                      <p className="text-sm text-gray-600">
+                        {formatLastLogin(user.last_login, user.id === currentUserId)}
+                      </p>
                     </td>
 
                     {/* Actions */}
