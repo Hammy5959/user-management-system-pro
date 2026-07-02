@@ -8,6 +8,7 @@ export interface ApiUser {
   is_active: boolean;
   permissions: string[];
   profile_picture?: string;
+  last_login?: string;
 }
 
 export interface CreateUserPayload {
