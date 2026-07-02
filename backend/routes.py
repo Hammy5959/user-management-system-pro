@@ -1,6 +1,7 @@
 import jwt
 import os
 import uuid
+from datetime import datetime
 from flask import request, jsonify
 from models import User, Permission, Role, db
 from auth import generate_otp, create_jwt, permission_required, get_current_user, is_super_admin, OTP_STORE
@@ -46,6 +47,8 @@ def register_routes(app):
             return jsonify({"msg": "Invalid OTP"}), 400
 
         user = User.query.filter_by(email=email).first()
+        user.last_login = datetime.utcnow()
+        db.session.commit()
         token = create_jwt(user)
 
         return jsonify(
@@ -145,6 +148,7 @@ def register_routes(app):
                     "role": u.role.name if u.role else None,
                     "is_active": u.is_active,
                     "profile_picture": u.profile_picture,
+                    "last_login": (u.last_login.isoformat() + "Z") if u.last_login else None,
                     "permissions": [p.name for p in u.role.permissions] if u.role else [],
                 }
                 for u in users
