@@ -35,6 +35,7 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     profile_picture = db.Column(db.String(255), nullable=True)
+    last_login = db.Column(db.DateTime, nullable=True)
 
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"))
     role = db.relationship("Role", backref="users")

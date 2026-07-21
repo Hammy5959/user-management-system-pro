@@ -48,6 +48,18 @@ with app.app_context():
     except Exception as e:
         print(f"[migrate] profile_picture skipped: {e}")
 
+    # Migration: add last_login column if missing (existing databases)
+    try:
+        inspector = inspect(db.engine)
+        columns = [c["name"] for c in inspector.get_columns("user")]
+        if "last_login" not in columns:
+            with db.engine.connect() as conn:
+                conn.execute(text("ALTER TABLE user ADD COLUMN last_login DATETIME"))
+                conn.commit()
+            print("[migrate] Added last_login column")
+    except Exception as e:
+        print(f"[migrate] last_login skipped: {e}")
+
     # Migration: user_permissions -> role_permissions (existing databases from old schema)
     try:
         inspector = inspect(db.engine)
