@@ -57,7 +57,9 @@ export default function ProfileDropdown({
             </div>
             <div className="flex items-center gap-3 text-sm">
               <Phone size={14} className="text-gray-400 shrink-0" />
-              <span className="text-gray-600">{user.phone}</span>
+              <span className="text-gray-600">
+                {user.phone || "N/A"}
+              </span>
             </div>
             <div className="flex items-center gap-3 text-sm">
               <Shield size={14} className="text-gray-400 shrink-0" />
