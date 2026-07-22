@@ -81,6 +81,7 @@ python main.py
 cd ../frontend
 npm install
 npm run dev
+npm run start
 ```
 
 ### 4. Open the Application
